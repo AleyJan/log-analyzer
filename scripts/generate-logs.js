@@ -79,12 +79,10 @@ function randomTimestamp(base) {
   const format = randomInt(1, 4);
   const d = new Date(base);
   if (format === 1) return d.toISOString().replace(".000Z", "Z"); // 2024-03-15T14:23:01Z
-  if (format === 2)
-    return d
-      .toISOString()
-      .replace("T", " ")
-      .replace(".000Z", "")
-      .replace(/-/g, "/"); // 2024/03/15 14:23:01
+  if (format === 2) {
+    const iso = d.toISOString().replace(".000Z", "Z");
+    return iso.replace(/-/g, "/").replace("T", " ").replace("Z", "");
+  }
   if (format === 3) {
     // 15-Mar-2024 14:23:01
     const months = [
