@@ -6,12 +6,12 @@ It is built to handle real-world logs: mixed timestamp formats, different respon
 
 The same parsing/analysis engine powers two interfaces:
 
-- **CLI** — point it at a file, get a colored terminal report.
-- **Web dashboard** — upload a file, explore the results visually.
+- **CLI** : point it at a file, get a colored terminal report.
+- **Web dashboard** : upload a file, explore the results visually.
 
 ---
 
-## Quick Start (CLI — fastest way to evaluate)
+## Quick Start (CLI : fastest way to evaluate)
 
 Requires **Node.js 18+** (no other install needed for the CLI).
 
@@ -27,7 +27,7 @@ To run against your own file:
 node cli.js /path/to/your/file.log
 ```
 
-That's it. The CLI has zero dependencies — it uses only Node's built-in modules.
+That's it. The CLI has zero dependencies, it uses only Node's built-in modules.
 
 ---
 
@@ -130,7 +130,7 @@ log-analyzer/
     └── generate-logs.js        # test-data generator
 ```
 
-The CLI and the web backend both import the **same** `backend/parser.js` and `backend/analyzer.js`, so the analysis logic is identical across interfaces — there is only one source of truth.
+The CLI and the web backend both import the **same** `backend/parser.js` and `backend/analyzer.js`, so the analysis logic is identical across interfaces there is only one source of truth.
 
 ---
 

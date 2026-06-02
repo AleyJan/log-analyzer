@@ -38,14 +38,14 @@ Then open http://localhost:5173 and drag a log file in.
 
 Why this fit the task:
 
-- **Log parsing is string and regex work**, which JavaScript handles natively and which I know well enough to debug quickly under a deadline. The whole parser is built on the standard library — no dependency I'd have to learn or trust.
+- **Log parsing is string and regex work**, which JavaScript handles natively and which I know well enough to debug quickly under a deadline. The whole parser is built on the standard library, no dependency I'd have to learn or trust.
 - **One engine, two interfaces.** The core `parser.js` and `analyzer.js` are pure functions with no I/O. The CLI and the Express backend both import them unchanged, so there's a single source of truth for the analysis logic. Adding the web dashboard cost no duplication.
 - **The analyzer functions are pure** (data in, data out, no side effects), which made them easy to test in isolation by piping `parsed`/`skipped` through them in a one-line `node -e` command during development.
 
 What would have been a worse choice:
 
-- **A heavy log-parsing library or a regex-grammar framework.** The whole point of the task is handling input that doesn't fit a fixed grammar. A rigid parser generator would fight the "5–10% deviates" requirement — I'd spend more time bending the library than just writing forgiving JavaScript.
-- **Python with pandas.** Tempting for the stats, but pandas wants clean tabular input. Feeding it logs where 10% of rows are malformed, multi-line, or JSON means heavy pre-cleaning anyway — and it adds an install step and a heavier runtime for what is fundamentally line-by-line text triage.
+- **A heavy log-parsing library or a regex-grammar framework.** The whole point of the task is handling input that doesn't fit a fixed grammar. A rigid parser generator would fight the "5–10% deviates" requirement. I'd spend more time bending the library than just writing forgiving JavaScript.
+- **Python with pandas.** Tempting for the stats, but pandas wants clean tabular input. Feeding it logs where 10% of rows are malformed, multi-line, or JSON means heavy pre-cleaning anyway and it adds an install step and a heavier runtime for what is fundamentally line-by-line text triage.
 - **A pure shell pipeline (grep/awk).** Fast to start, but it falls apart the moment you need to normalize four timestamp formats and three response-time units into comparable values, and it has no graceful way to _count and report_ what it skipped.
 
 ---
@@ -68,9 +68,9 @@ The problem: most fields are whitespace-delimited, so the natural instinct is to
 
 With a naive `\S+`, the regex captures only `15-Mar-2024` as the timestamp, then tries to read `14:23:01` as the IP address, the real IP as the method, and the whole line fails to match. It gets silently classified as malformed.
 
-This was the single biggest source of false skips during development — at one point ~1,000 perfectly valid lines were being dropped. The fix is the first alternation group: it explicitly matches the two space-containing timestamp shapes _before_ falling back to `\S+` for the space-free formats (ISO 8601, Unix epoch).
+This was the single biggest source of false skips during development at one point ~1,000 perfectly valid lines were being dropped. The fix is the first alternation group: it explicitly matches the two space-containing timestamp shapes _before_ falling back to `\S+` for the space-free formats (ISO 8601, Unix epoch).
 
-Without this handling, the tool would report a hugely inflated "skipped" count and undercount real traffic — exactly the kind of silent data loss the task warns against. It would look like it worked (no crash, a clean report) while quietly throwing away half the valid log.
+Without this handling, the tool would report a hugely inflated "skipped" count and undercount real traffic exactly the kind of silent data loss the task warns against. It would look like it worked (no crash, a clean report) while quietly throwing away half the valid log.
 
 ---
 
@@ -104,6 +104,6 @@ In `backend/parser.js`, `parseLogFile` takes the full file content and does `con
 
 I tested this on a generated **300,000-line (17 MB)** file and it completed in ~1.7 seconds, so it comfortably handles the assessment's stated maximum ("a few hundred thousand lines"). But it would not scale to genuinely large logs — a multi-gigabyte file would exhaust memory and crash, which is ironic for a tool whose whole selling point is not crashing on bad input.
 
-**With another day**, I'd refactor the read path to stream the file line-by-line using Node's `readline` interface over a read stream, passing each line through the existing per-line parse logic and accumulating only the aggregate stats (counts, running averages, top-N) rather than retaining every parsed object. The parser is already structured around independent per-line decisions, so the parse logic itself wouldn't change — only how lines are fed into it. That would take memory from O(file size) down to roughly O(number of distinct endpoints/IPs), letting it handle arbitrarily large files.
+**With another day**, I'd refactor the read path to stream the file line-by-line using Node's `readline` interface over a read stream, passing each line through the existing per-line parse logic and accumulating only the aggregate stats (counts, running averages, top-N) rather than retaining every parsed object. The parser is already structured around independent per-line decisions, so the parse logic itself wouldn't change only how lines are fed into it. That would take memory from O(file size) down to roughly O(number of distinct endpoints/IPs), letting it handle arbitrarily large files.
 
 A second, smaller gap: the analyzer computes a simple mean for slowest-endpoint response times. A single outlier can skew that. Given more time I'd add p50/p95/p99 percentiles, which are what you actually want when you're on call and looking at latency.
