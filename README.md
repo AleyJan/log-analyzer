@@ -1,8 +1,8 @@
 # Log Analyzer
 
-A tool that takes a messy server log file and produces useful, on-call-friendly output — error patterns, slowest endpoints, traffic by IP, and a clear account of every line it couldn't parse.
+A tool that takes a messy server log file and produces useful, on-call-friendly output, error patterns, slowest endpoints, traffic by IP, and a clear account of every line it couldn't parse.
 
-It is built to handle real-world logs: mixed timestamp formats, different response-time units, missing status codes, appended user-agent fields, JSON lines bolted on midway, and outright garbage (stack traces, partial writes, blank lines). **It never crashes on bad input — malformed lines are skipped, counted, and surfaced with their line numbers, never silently dropped.**
+It is built to handle real-world logs: mixed timestamp formats, different response-time units, missing status codes, appended user-agent fields, JSON lines bolted on midway, and outright garbage (stack traces, partial writes, blank lines). **It never crashes on bad input, malformed lines are skipped, counted, and surfaced with their line numbers, never silently dropped.**
 
 The same parsing/analysis engine powers two interfaces:
 
