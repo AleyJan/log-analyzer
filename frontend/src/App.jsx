@@ -10,6 +10,8 @@ import SkippedLines from "./components/SkippedLines";
 import RequestsOverTime from "./components/RequestsOverTime";
 import "./App.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export default function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -36,7 +38,7 @@ export default function App() {
     const formData = new FormData();
     formData.append("logfile", file);
     try {
-      const res = await axios.post("http://localhost:3001/analyze", formData);
+      const res = await axios.post(`${API_URL}/analyze`, formData);
       setData(res.data);
       setAnalyzedAt(new Date().toISOString());
     } catch (err) {
